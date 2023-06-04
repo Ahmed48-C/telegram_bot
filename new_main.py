@@ -42,6 +42,7 @@ from telegram.ext import (
 )
 
 from commands.url_shortner import url_shortner
+from commands.fibonacci import fibonacci_generator
 
 # Enable logging
 logging.basicConfig(
@@ -50,12 +51,12 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 STEP_1, STEP_2 = range(2)
-ALL_COMMANDS = ["url", "add_five"]
+ALL_COMMANDS = ["url", "fibonacci"]
 ESCAPED_COMMANDS = [re.escape(command) for command in ALL_COMMANDS]
 COMMANDS_PATTERN = r'^(' + '|'.join(ESCAPED_COMMANDS) + r')'
 ALL_COMMANDS_VALUES = {
     "url": "url",
-    "add_five": "number",
+    "fibonacci": "number",
 }
 SELECTED_COMMAND = None
 
@@ -111,16 +112,16 @@ async def step_2(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
             await update.message.reply_text(
                 "Sorry, invalid url."
             )
-    elif SELECTED_COMMAND == "add_five":
+    elif SELECTED_COMMAND == "fibonacci":
         try:
-            new_number = int(user_input) + 5
+            fib_nums = int(user_input)
             await update.message.reply_text(
-                f"Solution : {new_number}"
+                f"{user_input} Fibonacci number are : {fibonacci_generator(fib_nums)}"
             )
         except Exception as e:
             logger.info("Error on handling number : %s", str(e))
             await update.message.reply_text(
-                "Sorry, invalid number."
+                "Sorry, invalid input."
             )
 
     SELECTED_COMMAND = None
