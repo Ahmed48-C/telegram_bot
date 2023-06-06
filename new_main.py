@@ -44,6 +44,7 @@ from telegram.ext import (
 from commands.url_shortner import url_shortner
 from commands.fibonacci import fibonacci_generator
 from commands.random_joke import random_joke
+from commands.random_quote import random_quote
 
 # Enable logging
 logging.basicConfig(
@@ -52,8 +53,8 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 STEP_1, STEP_2 = range(2)
-ALL_COMMANDS = ["url", "fibonacci", "joke"]
-STEP_1_COMMANDS = ["joke"]
+ALL_COMMANDS = ["url", "fibonacci", "joke", "quote"]
+STEP_1_COMMANDS = ["joke", "quote"]
 ESCAPED_COMMANDS = [re.escape(command) for command in ALL_COMMANDS]
 COMMANDS_PATTERN = r'^(' + '|'.join(ESCAPED_COMMANDS) + r')'
 STEP_2_COMMANDS_VALUES = {
@@ -86,6 +87,10 @@ async def step_1(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     if SELECTED_COMMAND in STEP_1_COMMANDS:
         if SELECTED_COMMAND == "joke":
             await update.message.reply_text(random_joke())
+            SELECTED_COMMAND = None
+            return ConversationHandler.END
+        elif SELECTED_COMMAND == "quote":
+            await update.message.reply_text(random_quote())
             SELECTED_COMMAND = None
             return ConversationHandler.END
     else:
