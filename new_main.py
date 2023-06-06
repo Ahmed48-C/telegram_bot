@@ -45,6 +45,7 @@ from commands.url_shortner import url_shortner
 from commands.fibonacci import fibonacci_generator
 from commands.random_joke import random_joke
 from commands.random_quote import random_quote
+from commands.youtube_search import youtube_search
 
 # Enable logging
 logging.basicConfig(
@@ -53,13 +54,14 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 STEP_1, STEP_2 = range(2)
-ALL_COMMANDS = ["url", "fibonacci", "joke", "quote"]
+ALL_COMMANDS = ["url", "fibonacci", "joke", "quote", "youtube search"]
 STEP_1_COMMANDS = ["joke", "quote"]
 ESCAPED_COMMANDS = [re.escape(command) for command in ALL_COMMANDS]
 COMMANDS_PATTERN = r'^(' + '|'.join(ESCAPED_COMMANDS) + r')'
 STEP_2_COMMANDS_VALUES = {
     "url": "url",
     "fibonacci": "number",
+    "youtube search" : "what you want to search"
 }
 SELECTED_COMMAND = None
 
@@ -87,12 +89,10 @@ async def step_1(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     if SELECTED_COMMAND in STEP_1_COMMANDS:
         if SELECTED_COMMAND == "joke":
             await update.message.reply_text(random_joke())
-            SELECTED_COMMAND = None
-            return ConversationHandler.END
         elif SELECTED_COMMAND == "quote":
             await update.message.reply_text(random_quote())
-            SELECTED_COMMAND = None
-            return ConversationHandler.END
+        SELECTED_COMMAND = None
+        return ConversationHandler.END
     else:
         await update.message.reply_text(
                 f"Please provide {STEP_2_COMMANDS_VALUES[update.message.text]}",
@@ -135,6 +135,12 @@ async def step_2(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
             await update.message.reply_text(
                 "Sorry, invalid input."
             )
+    elif SELECTED_COMMAND == "youtube search":
+            result = youtube_search(user_input)
+            for i in result:
+                await update.message.reply_text(
+                    f"Found: {i}"
+                )
     
 
     SELECTED_COMMAND = None
