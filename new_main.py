@@ -43,6 +43,7 @@ from telegram.ext import (
 
 from commands.url_shortner import url_shortner
 from commands.fibonacci import fibonacci_generator
+from commands.random_joke import random_joke
 
 # Enable logging
 logging.basicConfig(
@@ -51,10 +52,11 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 STEP_1, STEP_2 = range(2)
-ALL_COMMANDS = ["url", "fibonacci"]
+ALL_COMMANDS = ["url", "fibonacci", "joke"]
+STEP_1_COMMANDS = ["joke"]
 ESCAPED_COMMANDS = [re.escape(command) for command in ALL_COMMANDS]
 COMMANDS_PATTERN = r'^(' + '|'.join(ESCAPED_COMMANDS) + r')'
-ALL_COMMANDS_VALUES = {
+STEP_2_COMMANDS_VALUES = {
     "url": "url",
     "fibonacci": "number",
 }
@@ -81,12 +83,17 @@ async def step_1(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     user = update.message.from_user
     logger.info("User selected the url command of %s: %s", user.first_name, update.message.text)
     SELECTED_COMMAND = update.message.text
-    await update.message.reply_text(
-        f"Please provide {ALL_COMMANDS_VALUES[update.message.text]}",
-        reply_markup=ReplyKeyboardRemove(),
-    )
-
-    return STEP_2
+    if SELECTED_COMMAND in STEP_1_COMMANDS:
+        if SELECTED_COMMAND == "joke":
+            await update.message.reply_text(random_joke())
+            SELECTED_COMMAND = None
+            return ConversationHandler.END
+    else:
+        await update.message.reply_text(
+                f"Please provide {STEP_2_COMMANDS_VALUES[update.message.text]}",
+                reply_markup=ReplyKeyboardRemove(),
+            )
+        return STEP_2
 
 # gets the input and return its the solution
 async def step_2(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -123,6 +130,7 @@ async def step_2(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
             await update.message.reply_text(
                 "Sorry, invalid input."
             )
+    
 
     SELECTED_COMMAND = None
     return ConversationHandler.END
