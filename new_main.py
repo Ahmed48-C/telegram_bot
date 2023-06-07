@@ -46,6 +46,7 @@ from commands.fibonacci import fibonacci_generator
 from commands.random_joke import random_joke
 from commands.random_quote import random_quote
 from commands.youtube_search import youtube_search
+from commands.qrcode_generator import text_to_qrcode
 
 # Enable logging
 logging.basicConfig(
@@ -54,14 +55,15 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 STEP_1, STEP_2 = range(2)
-ALL_COMMANDS = ["url", "fibonacci", "joke", "quote", "youtube search"]
+ALL_COMMANDS = ["url", "fibonacci", "joke", "quote", "youtube search", "qrcode"]
 STEP_1_COMMANDS = ["joke", "quote"]
 ESCAPED_COMMANDS = [re.escape(command) for command in ALL_COMMANDS]
 COMMANDS_PATTERN = r'^(' + '|'.join(ESCAPED_COMMANDS) + r')'
 STEP_2_COMMANDS_VALUES = {
     "url": "url",
     "fibonacci": "number",
-    "youtube search" : "what you want to search"
+    "youtube search" : "what you want to search",
+    "qrcode" : "your text to convert it to qrcode"
 }
 SELECTED_COMMAND = None
 
@@ -141,7 +143,10 @@ async def step_2(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
                 await update.message.reply_text(
                     f"Found: {i}"
                 )
-    
+    elif SELECTED_COMMAND == "qrcode":
+        await update.message.reply_photo(
+            text_to_qrcode(user_input)
+        )
 
     SELECTED_COMMAND = None
     return ConversationHandler.END
